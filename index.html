@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Aplikasi pencatat pengeluaran harian sederhana untuk mahasiswa. Atur batas anggaran, catat pengeluaran, dan pantau sisa uang.">
+  <meta name="theme-color" content="#1e4a42">
+  <title>Dompet Kuliah — Pencatat Pengeluaran Harian</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Lewati ke konten utama</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">Rp</span>
+        <div>
+          <p class="eyebrow">Pencatat pengeluaran</p>
+          <h1>Dompet Kuliah</h1>
+        </div>
+      </div>
+      <p class="month-badge" id="month-label">Bulan ini</p>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <section class="panel" aria-labelledby="budget-title">
+      <div class="panel-head">
+        <h2 id="budget-title">Batas anggaran per kategori</h2>
+        <p class="hint">Atur batas belanja untuk tiap kategori, lalu pantau sisanya secara otomatis.</p>
+      </div>
+
+      <form id="budget-form" class="budget-form" novalidate>
+        <div class="field">
+          <label for="budget-category">Kategori</label>
+          <select id="budget-category" name="category" required>
+            <option value="" selected disabled>Pilih kategori</option>
+            <option value="Makanan">Makanan &amp; minuman</option>
+            <option value="Transportasi">Transportasi</option>
+            <option value="Pendidikan">Pendidikan</option>
+            <option value="Hiburan">Hiburan</option>
+            <option value="Kebutuhan Harian">Kebutuhan harian</option>
+            <option value="Kesehatan">Kesehatan</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="budget-input">Batas anggaran (Rp)</label>
+          <input
+            id="budget-input"
+            name="budget"
+            type="number"
+            inputmode="numeric"
+            min="1"
+            step="1000"
+            placeholder="Contoh: 500000"
+            autocomplete="off"
+          >
+        </div>
+
+        <button class="btn btn-primary" type="submit">Simpan batas</button>
+      </form>
+      <p class="form-message" id="budget-message" role="status" aria-live="polite"></p>
+
+      <div class="budget-overview">
+        <div class="budget-overview-head">
+          <h3 class="budget-overview-title">Sisa anggaran per kategori</h3>
+          <span class="budget-count" id="budget-count" hidden>0 kategori</span>
+        </div>
+
+        <div class="budget-grid" id="budget-list"></div>
+
+        <div class="empty-state empty-state-compact" id="budget-empty">
+          <p class="empty-title">Belum ada batas kategori</p>
+          <p>Pilih kategori dan atur batasnya lewat form di atas.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="expense-title">
+      <div class="panel-head">
+        <h2 id="expense-title">Catat pengeluaran</h2>
+        <p class="hint">Setiap pengeluaran baru akan langsung mengurangi sisa anggaran kategorinya.</p>
+      </div>
+
+      <form id="expense-form" class="expense-form" novalidate>
+        <div class="field">
+          <label for="expense-name">Nama barang / pengeluaran</label>
+          <input
+            id="expense-name"
+            name="name"
+            type="text"
+            placeholder="Contoh: Nasi goreng"
+            maxlength="60"
+            autocomplete="off"
+            required
+          >
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="expense-amount">Nominal (Rp)</label>
+            <input
+              id="expense-amount"
+              name="amount"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              step="100"
+              placeholder="15000"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="expense-category">Kategori</label>
+            <select id="expense-category" name="category" required>
+              <option value="" selected disabled>Pilih kategori</option>
+              <option value="Makanan">Makanan &amp; minuman</option>
+              <option value="Transportasi">Transportasi</option>
+              <option value="Pendidikan">Pendidikan</option>
+              <option value="Hiburan">Hiburan</option>
+              <option value="Kebutuhan Harian">Kebutuhan harian</option>
+              <option value="Kesehatan">Kesehatan</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit">Tambah pengeluaran</button>
+        <p class="form-message" id="expense-message" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section class="panel" aria-labelledby="chart-title">
+      <div class="panel-head panel-head-row">
+        <div>
+          <h2 id="chart-title">Pengeluaran per kategori</h2>
+          <p class="hint" id="chart-summary">Belum ada pengeluaran untuk dihitung.</p>
+        </div>
+        <p class="chart-total" id="chart-total" hidden>Rp 0</p>
+      </div>
+
+      <div
+        class="chart"
+        id="category-chart"
+        role="list"
+        aria-label="Grafik batang pengeluaran per kategori"
+      ></div>
+
+      <div class="empty-state empty-state-compact" id="chart-empty">
+        <p class="empty-title">Grafik masih kosong</p>
+        <p>Tambahkan pengeluaran untuk melihat perbandingan tiap kategori.</p>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="history-title">
+      <div class="panel-head panel-head-row">
+        <div>
+          <h2 id="history-title">Riwayat pengeluaran</h2>
+          <p class="hint" id="history-count">Belum ada pengeluaran.</p>
+        </div>
+        <button class="btn btn-ghost" id="clear-expenses" type="button" hidden>Hapus semua</button>
+      </div>
+
+      <ul class="expense-list" id="expense-list" aria-label="Daftar pengeluaran"></ul>
+
+      <div class="empty-state" id="empty-state">
+        <p class="empty-title">Belum ada catatan</p>
+        <p>Pengeluaran yang kamu tambahkan akan muncul di sini.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Data disimpan di perangkat ini menggunakan <code>localStorage</code>. Tidak dikirim ke mana pun.</p>
+    </div>
+  </footer>
+</body>
+</html>
